@@ -39,36 +39,29 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   def handleHttpRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
     println("Request")
     
-    val parameters = new QueryStringDecoder(req.getUri()).getParameters().asInstanceOf[Map[String, scala.collection.immutable.Set[String]]];
+    val parameters = new QueryStringDecoder(req.getUri()).getParameters().toMap.map((pair) => {
+      val (key, value) = pair
+      (key, value.toSet)
+    })
     
     if(req.getUri().contains("/connect")) {
-      if(req.getUri().split("/").length<3) {
-    	  println("No session")
-    	  val sessionId = UUID.randomUUID.toString
-          
-//          val resp = new DefaultHttpResponse(HTTP_1_1, OK);
-//          resp.setCookie("SESSIONID", sessionId)
-//        
-    	  parameters.get("callback") match {
-    	    case Some(values) =>
-    	      val callback = values.first
+      parameters.get("callback") match {
+	    case Some(values) =>
+	      val callback = values.first
+	      if(req.getUri().split("/").length<3) {
+	    	  println("No session")
+	    	  val sessionId = UUID.randomUUID.toString
     	      val client = createClient(sessionId, callback)
     	      client.send("session-established", Map("sessionId" -> sessionId))
     	      handler.onConnect.apply(client, parameters)
-    	  }
-    	  
-//          sendHttpResponse(ctx.getChannel, resp)
-          
-          
-          
-          
+	      }
+	      else {
+	    	  val sessionId = req.getUri().split("/").last
+		      println("Session " + sessionId)
+		      val client = clients.getOrElse(sessionId, createClient(sessionId, callback))
+		      clients.putIfAbsent(sessionId, client)
+		  }
       }
-      else {
-    	  val sessionId = req.getUri().split("/").last
-	      println("Session " + sessionId)
-	      val client = clients.getOrElse(sessionId, createClient(sessionId))
-	      clients.putIfAbsent(sessionId, client)
-	  }
     }
     
     def createClient(sessionId: String, callback: String): Client =  {
