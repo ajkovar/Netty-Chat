@@ -1,28 +1,17 @@
 package rosy.async
 
-import org.jboss.netty.handler.codec.http.HttpVersion._
-import scala.collection.JavaConversions._
-import org.jboss.netty.handler.codec.http.HttpResponseStatus._
-import rosy.async.cookies.HttpRequestCookies._
-import rosy.async.cookies.HttpResponseCookies._
 import java.util.concurrent.ConcurrentHashMap
-import scala.collection.mutable.ConcurrentMap
+import java.util.UUID
+
+import scala.collection.JavaConversions.asScalaBuffer
+import scala.collection.JavaConversions.asScalaConcurrentMap
+import scala.collection.JavaConversions.mapAsScalaMap
+import scala.collection.immutable.Map
+
 import org.jboss.netty.channel.ChannelHandlerContext
 import org.jboss.netty.channel.MessageEvent
-import scala.collection.mutable.Set
 import org.jboss.netty.channel.SimpleChannelUpstreamHandler
-import org.jboss.netty.handler.codec.http.CookieDecoder
 import org.jboss.netty.handler.codec.http.HttpRequest
-import org.jboss.netty.handler.codec.http.Cookie
-import org.jboss.netty.handler.codec.http.CookieEncoder
-import org.jboss.netty.handler.codec.http.DefaultHttpResponse
-import org.jboss.netty.handler.codec.http.HttpResponse
-import java.util.UUID
-import org.jboss.netty.channel.ChannelFuture
-import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
-import org.jboss.netty.handler.codec.http.HttpHeaders._
-import org.jboss.netty.channel.Channel
-import org.jboss.netty.channel.ChannelFutureListener
 import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
@@ -39,7 +28,7 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   def handleHttpRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
     println("Request")
     
-    val parameters = new QueryStringDecoder(req.getUri()).getParameters().toMap.map((pair) => {
+    val parameters = new QueryStringDecoder(req.getUri).getParameters.toMap.map(pair => {
       val (key, value) = pair
       (key, value.toSet)
     })
@@ -51,35 +40,25 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
 	      if(req.getUri().split("/").length<3) {
 	    	  println("No session")
 	    	  val sessionId = UUID.randomUUID.toString
-    	      val client = createClient(sessionId, callback)
+    	      val client = createClient(sessionId, callback, ctx)
     	      client.send("session-established", Map("sessionId" -> sessionId))
     	      handler.onConnect.apply(client, parameters)
 	      }
 	      else {
-	    	  val sessionId = req.getUri().split("/").last
+    	      val sessionId = req.getUri().split("/").last.split("\\?").first
 		      println("Session " + sessionId)
-		      val client = clients.getOrElse(sessionId, createClient(sessionId, callback))
+		      val client = clients.getOrElse(sessionId, createClient(sessionId, callback, ctx))
 		      clients.putIfAbsent(sessionId, client)
 		  }
       }
     }
     
-    def createClient(sessionId: String, callback: String): Client =  {
+    def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext): Client =  {
       val client = new Client(sessionId)
       client.connected = true
       client.callback = callback
+      client.context = ctx
       client
-    }
-    
-    def sendHttpResponse(channel: Channel, res: HttpResponse) {
-        res.setHeader(CONTENT_TYPE, "text/javascript; charset=UTF-8")
-        res.addHeader("Access-Control-Allow-Origin", "*")
-        res.addHeader("Access-Control-Allow-Credentials", "true")
-        res.addHeader("Connection", "keep-alive")
-        setContentLength(res, res.getContent.readableBytes)
-        
-        val f = channel.write(res)
-        f.addListener(ChannelFutureListener.CLOSE)
     }
   }
 }

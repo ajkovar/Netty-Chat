@@ -15,7 +15,6 @@
 			type: "session-established",
 			callback: function(data) {
 				self.sessionId = data.sessionId
-				self.connect()
 			}
 		})
 	}
@@ -23,13 +22,13 @@
 		connect: function(callback){
 			var self = this;
 			request.call(self, "/connect", {}, function(response){
-				self.connect();
 				self.listeners.forEach(function(listener){
-					if("chat-"+listener.type===response.type){
+					if(listener.type===response.type){
 						listener.callback(response.data)
 					}
 				})
-				callback()
+				self.connect();
+				(callback && callback())
 			})
 		},
 		sendMessage: function(messageDetails){
