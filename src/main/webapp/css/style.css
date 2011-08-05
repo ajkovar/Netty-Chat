@@ -1,0 +1,27 @@
+.chat-messages, .chat-user-list{
+	background-color: #333;
+	color:#AAA;
+	padding:1em;
+}
+.chat-input {
+	width:100%;
+	padding:.3em;
+}
+
+.chat-box {
+	width:200px;
+	float:left;
+	margin:20px;
+	vertical-align:bottom;
+}
+.chat-bar {
+	position:fixed;
+	bottom:0px;
+	width:100%;
+}
+
+.chat-user-list {
+	width:100px;
+	float:left;
+	vertical-align:bottom;
+}

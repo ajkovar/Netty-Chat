@@ -1,0 +1,34 @@
+<html>
+  <head>
+	<link type="text/css" rel="stylesheet" href="css/style.css"> 
+	<script type="text/javascript" src="lib/jquery/jquery-1.5.js"></script>
+	<script type="text/javascript" src="lib/jquery/jquery.jsonp-2.1.4.min.js"></script>
+	<script type="text/javascript" src="lib/chat-client.js"></script>
+	<script type="text/javascript" src="lib/chat-box.js"></script>
+	<script type="text/javascript" src="lib/chat.js"></script>
+	<script type="text/javascript" src="lib/chat-bar.js"></script>
+	<style>
+	  .chat-box {
+	  position:relative;
+	  bottom:0px;
+	  margin:5px;
+	  margin-bottom:0px;
+	  }
+	  .chat-user-list {
+	  position:relative;
+	  bottom:0px;
+	  }
+	</style>
+	<script>
+	  $(document).ready(function(){
+	  var chatBar = new ChatBar({
+	  id:3,
+	  username:"bear grills"
+	  });
+	  })
+	</script>
+  </head>
+  <body>
+	Logged in as "bear grills"
+  <body>
+</html>
