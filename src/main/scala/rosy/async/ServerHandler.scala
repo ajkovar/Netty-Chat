@@ -33,11 +33,11 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
       (key, value.toSet)
     })
     
-    if(req.getUri().contains("/connect")) {
+    if(req.getUri.contains("/connect")) {
       parameters.get("callback") match {
 	    case Some(values) =>
 	      val callback = values.first
-	      if(req.getUri().split("/").length<3) {
+	      if(req.getUri.split("/").length<3) {
 	    	  println("No session")
 	    	  val sessionId = UUID.randomUUID.toString
     	      val client = createClient(sessionId, callback, ctx)
@@ -45,7 +45,7 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     	      handler.onConnect.apply(client, parameters)
 	      }
 	      else {
-    	      val sessionId = req.getUri().split("/").last.split("\\?").first
+    	      val sessionId = req.getUri.split("/").last.split("\\?").first
 		      println("Session " + sessionId)
 		      val client = clients.getOrElse(sessionId, createClient(sessionId, callback, ctx))
 		      clients.putIfAbsent(sessionId, client)
