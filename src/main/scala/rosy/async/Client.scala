@@ -27,7 +27,7 @@ class Client (id: String){
     val messageString = callback + "(" + Json.build(createMessage(messageType, message)).toString + ")"
     if(context.getChannel.isOpen) {
     	println("Sending message: " + messageString)
-    	sendHttpResponse(messageString)
+    	Util.sendHttpResponse(context.getChannel, messageString)
     }
     else {
       println("Attempting to send to non connected user message: " + messageString)
@@ -36,23 +36,4 @@ class Client (id: String){
   
   private def createMessage(messageType:String, content: Any) = Map("type" -> messageType, "data" -> content)
   
-  private def sendHttpResponse(body: String) {
-	val res = new DefaultHttpResponse(HTTP_1_1, OK);
-            		
-	val content = ChannelBuffers.copiedBuffer(body, CharsetUtil.US_ASCII);
-	
-    res.setHeader(CONTENT_TYPE, "text/javascript; charset=UTF-8");
-    setContentLength(res, content.readableBytes());
-
-    res.setContent(content);    
-    
-    res.setHeader(CONTENT_TYPE, "text/javascript; charset=UTF-8")
-    res.addHeader("Access-Control-Allow-Origin", "*")
-    res.addHeader("Access-Control-Allow-Credentials", "true")
-    res.addHeader("Connection", "keep-alive")
-    setContentLength(res, res.getContent.readableBytes)
-    
-    val f = context.getChannel.write(res)
-    f.addListener(ChannelFutureListener.CLOSE)
-  }
 }
