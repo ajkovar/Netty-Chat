@@ -36,10 +36,18 @@
 		},
 		getUsers: function(callback){
 			var self = this;
-			request.call(self, "/message", {messageType: "list-users"}, function(users){
-				console.log(users)
-				callback(users)
-			})
+			request.call(self, "/message", {messageType: "list-users"}, function(users){})
+			var listener = {
+				type: "user-list",
+				callback: function(response){
+					var users = response.users;
+					console.log(users);
+					self.listeners.splice(self.listeners.indexOf(listener), 1);
+					callback(users)
+				}
+			}
+
+			self.listeners.push(listener)
 		},
 		pushListener: function(listener){
 			this.listeners.push(listener)
