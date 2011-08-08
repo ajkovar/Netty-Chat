@@ -6,9 +6,9 @@ import org.jboss.netty.bootstrap.ServerBootstrap
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 
 class Server {
-	var connectCallbacks: Set[(Client, Map[String, Set[String]])=>Unit] = Set.empty
-	var messageCallbacks: Set[(Client, Map[String, Set[String]])=>Unit] = Set.empty
-	var disconnectCallbacks: Set[(Client, Map[String, Set[String]])=>Unit] = Set.empty
+	var connectCallbacks: Set[(Client, DataStore)=>Unit] = Set.empty
+	var messageCallbacks: Set[(Client, DataStore)=>Unit] = Set.empty
+	var disconnectCallbacks: Set[(Client, DataStore)=>Unit] = Set.empty
 	
 	def start {
 	  println("Starting server");
@@ -36,8 +36,8 @@ class Server {
 		// Bind and start to accept incoming connections.
 	    bootstrap.bind(new InetSocketAddress(8081))
 	}
-	def onConnect(callback:(Client, Map[String, Set[String]])=>Unit) = connectCallbacks+=callback
-	def onDisconnect(callback:(Client, Map[String, Set[String]])=>Unit) = disconnectCallbacks+=callback
-	def onMessage(callback:(Client, Map[String, Set[String]])=>Unit) = messageCallbacks+=callback
+	def onConnect(callback:(Client, DataStore)=>Unit) = connectCallbacks+=callback
+	def onDisconnect(callback:(Client, DataStore)=>Unit) = disconnectCallbacks+=callback
+	def onMessage(callback:(Client, DataStore)=>Unit) = messageCallbacks+=callback
 }
 

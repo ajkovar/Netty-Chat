@@ -17,7 +17,7 @@ import org.jboss.netty.channel.ChannelHandlerContext
 
 class Client (id: String){
   @BeanProperty var connected = true
-  @BeanProperty var data = Map[String, Set[String]]()
+  @BeanProperty var data:DataStore = null
   @BeanProperty var callback = ""
   @BeanProperty var context:ChannelHandlerContext = null 
     

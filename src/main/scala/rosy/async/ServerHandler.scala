@@ -27,17 +27,14 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   
   def handleHttpRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
     println("Request")
-    
-    val parameters = new QueryStringDecoder(req.getUri).getParameters.toMap.map(pair => {
+    val parameters = new DataStore(new QueryStringDecoder(req.getUri).getParameters.toMap.map(pair => {
       val (key, value) = pair
       (key, value.toSet)
-    })
+    }))
     
     if(req.getUri.contains("/connect")) {
-      parameters.get("callback") match {
-	    case Some(values) =>
-	      val callback = values.first
-	      if(req.getUri.split("/").length<3) {
+      parameters.getValue("callback", (callback) => {
+        if(req.getUri.split("/").length<3) {
 	    	  println("No session")
 	    	  val sessionId = UUID.randomUUID.toString
     	      val client = createClient(sessionId, callback, ctx)
@@ -50,7 +47,7 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
 		      val client = clients.getOrElse(sessionId, createClient(sessionId, callback, ctx))
 		      clients.putIfAbsent(sessionId, client)
 		  }
-      }
+      })
     }
     
     def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext): Client =  {

@@ -1,6 +1,6 @@
 package rosy.async
 import scala.collection.immutable.Set
-import com.twitter.json._
+import rosy.async.DataStore.requestDataToMap
 
 object Example {
   def main(args : Array[String]) : Unit = {
@@ -21,34 +21,34 @@ object Example {
     
     server.onMessage((client, data) => {
     	println("message")
-    	data.get("messageType") match {
-    	  case Some(messageType) =>
-    	    messageType.first match {
+    	
+    	data.getValue("messageType", messageType => {
+    	  messageType match {
     	      case "message" => 
-    	        data.get("body").flatten.foreach(body => {
-		    		data.get("groupId").flatten.foreach(groupId => {
-		    			data.get("toId").flatten.foreach(toId => {
-		    			  listeners.get(groupId).flatten
-			    			.filter(_.data.get("id").exists(_==toId))
-			    			.foreach(_.send("chat-message", Map("toId" -> toId, "body" -> body)))
-		    			})
-		    		})
-		    	})
+    	        data.forEachValueOf("body", body => {
+    	          data.forEachValueOf("groupId", groupId => {
+    	            data.forEachValueOf("toId", toId => {
+    	            	listeners.get(groupId).flatten
+		    			.filter(_.data.get("id").exists(_==toId))
+		    			.foreach(_.send("chat-message", Map("toId" -> toId, "body" -> body)))
+    	            })
+    	          })
+    	        })
     	      case "list-users" =>
-    	        val id = client.data.get("id").first
-    	        client.data.get("groupId").flatten.foreach(groupId => {
+    	        val id = client.data.getValue("id").get
+    	        client.data.forEachValueOf("groupId", groupId => {
     	        	client.send("user-list", 
     	        	  Map[String, List[Map[String, Any]]](
 	    	        	"users" -> 
 		    	          listeners.get(groupId).flatten
 		    	        	.filter(_.data.get("id").exists(_==id))
 		    	        	.map(listener => {
-		    	        	  listener.data
+		    	        	  listener.data.toMap
 		    	        	}).toList
 	    	        ))
     	        })
     	    }
-    	}
+    	})
     })
     
     server.onDisconnect((client, data) => {
