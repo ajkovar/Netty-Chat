@@ -25,7 +25,6 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   }
   
   def handleHttpRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
-    println("Request")
     val parameters = new DataStore(new QueryStringDecoder(req.getUri).getParameters.toMap.map(pair => {
       val (key, value) = pair
       (key, value.toSet)
