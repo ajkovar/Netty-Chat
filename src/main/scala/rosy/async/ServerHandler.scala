@@ -48,11 +48,11 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     	          println("Session " + sessionId)
     	        case _ => println("no client found with session ID: " + sessionId)
     	      }
-		      
 		  }
       })
     }
     else if(req.getUri.contains("/message")) {
+      Util.sendHttpResponse(ctx.getChannel, "")
       val sessionId = req.getUri.split("/").last.split("\\?").first
       val client = clients.get(sessionId) match {
         case Some(client) => 
