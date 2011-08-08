@@ -16,7 +16,7 @@ object Util {
 	val content = ChannelBuffers.copiedBuffer(body, CharsetUtil.US_ASCII);
 	
     res.setHeader(CONTENT_TYPE, "text/javascript; charset=UTF-8");
-    setContentLength(res, content.readableBytes());
+    setContentLength(res, content.readableBytes);
 
     res.setContent(content);    
     
