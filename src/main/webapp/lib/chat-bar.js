@@ -26,12 +26,12 @@
 		self.chatBar.append(userList);
 
 		client.pushListener({
-			type: "message",
+			type: "chat-message",
 			callback: function(data) {
 				if(!self.openChats[data.fromId]) {
 					self.users.forEach(function(user){
 						if(user.id===data.fromId){
-							openChat.call(self, user, data.message)
+							openChat.call(self, user, data.body)
 						}
 					})
 				}
@@ -39,10 +39,13 @@
 		})
 
 		client.pushListener({
-			type: "user-connect",
-			callback: function(data) {
-				self.users.push(data)
-				populateUserList.call(self);
+			type: "chat-user-connect",
+			callback: function(user) {
+				var userIsNew = true//$.grep(self.users, function(existingUser){existingUser.id==user.id}).length==0;
+				if(userIsNew){
+					self.users.push(user)
+					populateUserList.call(self);
+				}
 			}
 		})
 

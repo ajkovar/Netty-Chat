@@ -8,13 +8,13 @@
 		self.chatBox = new ChatBox(config);
 
 		client.pushListener({
-			type: "message",
+			type: "chat-message",
 			callback: function(data){
 				var u = $.grep(self.config.users, function(u) {
 					return u.id===data.fromId
 				})
 				if(u.length>0){
-					self.chatBox.addMessage(u[0].username, data.message)
+					self.chatBox.addMessage(u[0].username, data.body)
 				}
 			}
 		})
@@ -22,8 +22,8 @@
 		self.chatBox.onSend = function(message){
 			config.users.forEach(function(u){
 				client.sendMessage({
-					to: u.id,
-					message: message 
+					toId: u.id,
+					body: message 
 				});
 			})
 		}

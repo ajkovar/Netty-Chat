@@ -15,7 +15,8 @@ object Example {
         listeners.get(groupId).flatten
         	.filter(_.data.getValue("id").exists(_!=id))
         	.foreach(client => {
-        		client.send("chat-user-join", Map("username" -> data.getValue("username").get, "id" -> data.getValue("id").get))
+        		println("user " + client.data.getValue("username").get)
+        		client.send("chat-user-connect", Map("username" -> data.getValue("username").get, "id" -> data.getValue("id").get))
         	})
         var group = listeners.getOrElse(groupId, Set.empty)
         var inGroup = group.exists(_.data.getValue("id").get==id)
@@ -29,12 +30,14 @@ object Example {
     	data.getValue("messageType", messageType => {
     	  messageType match {
     	      case "message" => 
-    	        data.forEachValueOf("body", body => {
-    	          data.forEachValueOf("groupId", groupId => {
+    	        val id = client.data.getValue("id").get
+    	        client.data.forEachValueOf("groupId", groupId => {
+    	          data.forEachValueOf("body", body => {
     	            data.forEachValueOf("toId", toId => {
     	            	listeners.get(groupId).flatten
-		    			.filter(_.data.getValue("id").exists(_!=toId))
-		    			.foreach(_.send("chat-message", Map("toId" -> toId, "body" -> body)))
+		    			.filter(_.data.getValue("id").exists(_==toId))
+		    			.filter(_.data.getValue("id").exists(_!=id))
+		    			.foreach(_.send("chat-message", Map("toId" -> toId, "body" -> body, "fromId" -> id)))
     	            })
     	          })
     	        })
@@ -42,7 +45,7 @@ object Example {
     	        val id = client.data.getValue("id").get
     	        client.data.forEachValueOf("groupId", groupId => {
     	        	client.send("user-list", 
-    	        	  Map[String, List[Map[String, Any]]](
+    	        	  Map(
 	    	        	"users" -> 
 		    	          listeners.get(groupId).flatten
 		    	        	.filter(_.data.getValue("id").exists(_!=id))
@@ -52,6 +55,7 @@ object Example {
 		    	        	}).toList
 	    	        ))
     	        })
+    	      case _ => println("message type " + messageType + " not found")
     	    }
     	})
     })

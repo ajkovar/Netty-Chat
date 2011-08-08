@@ -32,7 +32,7 @@
 			})
 		},
 		sendMessage: function(messageDetails){
-			request.call(this, "/message", messageDetails, function(){})
+			request.call(this, "/message", $.extend({messageType: "message"}, messageDetails), function(){})
 		},
 		getUsers: function(callback){
 			var self = this;
