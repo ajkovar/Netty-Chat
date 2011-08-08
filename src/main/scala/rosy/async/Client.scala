@@ -25,8 +25,13 @@ class Client (id: String){
   
   def send(messageType: String, message :  Any) {
     val messageString = callback + "(" + Json.build(createMessage(messageType, message)).toString + ")"
-    println(messageString)
-    sendHttpResponse(messageString)
+    if(context.getChannel.isOpen) {
+    	println("Sending message: " + messageString)
+    	sendHttpResponse(messageString)
+    }
+    else {
+      println("Attempting to send to non connected user message: " + messageString)
+    }
   }
   
   private def createMessage(messageType:String, content: Any) = Map("type" -> messageType, "data" -> content)
