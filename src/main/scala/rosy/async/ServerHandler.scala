@@ -1,6 +1,5 @@
 package rosy.async
 
-import java.util.concurrent.ConcurrentHashMap
 import java.util.UUID
 
 import scala.collection.JavaConversions.asScalaBuffer
@@ -16,7 +15,7 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder
 
 class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   
-  var clients = new ConcurrentHashMap[String, Client]
+  var clients: Map[String, Client] = Map.empty
   
   override def messageReceived(ctx: ChannelHandlerContext, e: MessageEvent) {
 	val msg: Object = e.getMessage;
@@ -37,25 +36,39 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
         if(req.getUri.split("/").length<3) {
 	    	  println("No session")
 	    	  val sessionId = UUID.randomUUID.toString
-    	      val client = createClient(sessionId, callback, ctx)
+    	      val client = createClient(sessionId, callback, ctx, parameters)
+    	      clients+=sessionId->client
     	      client.send("session-established", Map("sessionId" -> sessionId))
     	      handler.onConnect.apply(client, parameters)
 	      }
 	      else {
     	      val sessionId = req.getUri.split("/").last.split("\\?").first
-		      println("Session " + sessionId)
-		      val client = clients.getOrElse(sessionId, createClient(sessionId, callback, ctx))
-		      clients.putIfAbsent(sessionId, client)
+		      val client = clients.get(sessionId) match {
+    	        case Some(client) =>
+    	          client.context=ctx
+    	          println("Session " + sessionId)
+    	        case _ => println("no client found with session ID: " + sessionId)
+    	      }
+		      
 		  }
       })
     }
-    
-    def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext): Client =  {
-      val client = new Client(sessionId)
-      client.connected = true
-      client.callback = callback
-      client.context = ctx
-      client
+    else if(req.getUri.contains("/message")) {
+      val sessionId = req.getUri.split("/").last.split("\\?").first
+      val client = clients.get(sessionId) match {
+        case Some(client) => 
+          handler.onMessage.apply(client, parameters)
+        case _ => println("no client found with session ID: " + sessionId)
+      }
     }
+  }
+  
+  private def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext, parameters: DataStore): Client =  {
+	  val client = new Client(sessionId)
+	  client.connected = true
+	  client.callback = callback
+	  client.context = ctx
+	  client.data = parameters
+	  client
   }
 }

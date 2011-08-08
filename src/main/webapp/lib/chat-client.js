@@ -36,7 +36,7 @@
 		},
 		getUsers: function(callback){
 			var self = this;
-			request.call(self, "/users", {messageType: "list-users"}, function(users){
+			request.call(self, "/message", {messageType: "list-users"}, function(users){
 				console.log(users)
 				callback(users)
 			})
@@ -52,7 +52,7 @@
 			url: self.sessionId ? (self.config.url + path + "/" + self.sessionId) : (self.config.url + path),
 			data: $.extend({}, data, {
 				groupId: self.config.groupId,
-				userId: self.config.user.id,
+				id: self.config.user.id,
 				username: self.config.user.username
 			}),
 			callbackParameter: "callback",

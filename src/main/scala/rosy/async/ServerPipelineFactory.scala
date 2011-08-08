@@ -8,14 +8,15 @@ import org.jboss.netty.handler.codec.http.HttpRequestDecoder
 import org.jboss.netty.handler.codec.http.HttpResponseEncoder
 
 class ServerPipelineFactory (h:Handler) extends ChannelPipelineFactory {
-	def getPipeline(): ChannelPipeline = {
-    	var handler: ServerHandler  = new ServerHandler(h);
+  var handler: ServerHandler  = new ServerHandler(h)
+  
+  def getPipeline(): ChannelPipeline = {
     	
         // Create a default pipeline implementation.
-        val pl: ChannelPipeline = pipeline();
-        pl.addLast("decoder", new HttpRequestDecoder());
-        pl.addLast("aggregator", new HttpChunkAggregator(65536));
-        pl.addLast("encoder", new HttpResponseEncoder());
+        val pl: ChannelPipeline = pipeline()
+        pl.addLast("decoder", new HttpRequestDecoder)
+        pl.addLast("aggregator", new HttpChunkAggregator(65536))
+        pl.addLast("encoder", new HttpResponseEncoder)
         pl.addLast("handler", handler);
         return pl;
     }
