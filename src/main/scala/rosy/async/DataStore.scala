@@ -7,8 +7,14 @@ class DataStore(val data: Map[String, Set[String]]) {
       return Some(data.get(name).flatten.first)
     else return None
   }
-  def getValue(name: String, callback: String => Unit) = {}
-  def forEachValueOf(name: String, callback: String => Unit) = {}
+  def getValue(name: String, callback: String => Unit) = {
+    if(data.get(name).isDefined) {
+      callback(data.get(name).get.first)
+    }
+  }
+  def forEachValueOf(name: String, callback: String => Unit) = {
+    data.get(name).flatten.foreach(callback)
+  }
 }
 
 object DataStore {
