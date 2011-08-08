@@ -44,7 +44,8 @@ object Example {
 		    	          listeners.get(groupId).flatten
 		    	        	.filter(_.data.getValue("id").exists(_!=id))
 		    	        	.map(listener => {
-		    	        	  listener.data.toMap
+		    	        	  Map("username" -> listener.data.getValue("username").get,
+		    	        	      "id" -> listener.data.getValue("id").get)
 		    	        	}).toList
 	    	        ))
     	        })
