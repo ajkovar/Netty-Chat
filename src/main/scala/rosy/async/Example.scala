@@ -17,12 +17,15 @@ object Example {
         	.foreach(client => {
         		client.send("chat-user-join", Map("username" -> data.getValue("username").get, "id" -> data.getValue("id").get))
         	})
-        listeners+=groupId->(listeners.getOrElse(groupId, Set.empty)+client)
+        var group = listeners.getOrElse(groupId, Set.empty)
+        var inGroup = group.exists(_.data.getValue("id").get==id)
+        if(!inGroup) {
+          listeners+=groupId->(group+client)
+        }
       })
     })
     
     server.onMessage((client, data) => {
-    	println("message")
     	data.getValue("messageType", messageType => {
     	  messageType match {
     	      case "message" => 
