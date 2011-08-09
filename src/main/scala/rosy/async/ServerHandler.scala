@@ -32,42 +32,58 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     
     if(req.getUri.contains("/connect")) {
       parameters.getValue("callback", (callback) => {
-        if(req.getUri.split("/").length<3) {
-	    	  println("No session")
+        getSessionId(req) match {
+          case None =>
+              println("No session")
 	    	  val sessionId = UUID.randomUUID.toString
     	      val client = createClient(sessionId, callback, ctx, parameters)
     	      clients+=sessionId->client
     	      client.send("session-established", Map("sessionId" -> sessionId))
     	      handler.onConnect.apply(client, parameters)
-	      }
-	      else {
-    	      val sessionId = req.getUri.split("/").last.split("\\?").first
+          case Some(sessionId) =>
+    	      println("Session " + sessionId)
 		      val client = clients.get(sessionId) match {
-    	        case Some(client) =>
-    	          client.context=ctx
-    	          println("Session " + sessionId)
-    	        case _ => println("no client found with session ID: " + sessionId)
-    	      }
-		  }
+		        case Some(client) =>
+		          client.context=ctx
+		          client.connected=true
+		          client.lastConnected=new DateTime
+		        case _ => println("no client found with session ID: " + sessionId)
+		      }
+        }
       })
     }
     else if(req.getUri.contains("/message")) {
       Util.sendHttpResponse(ctx.getChannel, "")
-      val sessionId = req.getUri.split("/").last.split("\\?").first
-      val client = clients.get(sessionId) match {
-        case Some(client) => 
-          handler.onMessage.apply(client, parameters)
-        case _ => println("no client found with session ID: " + sessionId)
+      getSessionId(req) match {
+        case Some(sessionId) =>
+          	val client = clients.get(sessionId) match {
+		        case Some(client) => 
+		          handler.onMessage.apply(client, parameters)
+		        case _ => println("no client found with session ID: " + sessionId)
+          	}
+        case None =>
+          	println("message sent with no session")
       }
+      
+    }
+  }
+  
+  private def getSessionId(req: HttpRequest):Option[String] = {
+    if(req.getUri.split("/").length<3) {
+      return None
+    }
+    else {
+      return Some(req.getUri.split("/").last.split("\\?").first)
     }
   }
   
   private def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext, parameters: DataStore): Client =  {
 	  val client = new Client(sessionId)
-	  client.connected = true
 	  client.callback = callback
 	  client.context = ctx
 	  client.data = parameters
+	  client.connected=true
+	  client.lastConnected = new DateTime
 	  client
   }
 }

@@ -14,12 +14,14 @@ import org.jboss.netty.buffer.ChannelBuffers
 import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.channel.ChannelHandlerContext
+import org.joda.time.DateTime
 
-class Client (id: String){
+class Client (var sessionId: String){
   @BeanProperty var connected = true
   @BeanProperty var data:DataStore = null
   @BeanProperty var callback = ""
   @BeanProperty var context:ChannelHandlerContext = null 
+  @BeanProperty var lastConnected:DateTime = null
     
   def onDisconnect(callback: ()=>Unit) {}
   
@@ -27,6 +29,7 @@ class Client (id: String){
     val messageString = callback + "(" + Json.build(createMessage(messageType, message)).toString + ")"
     if(context.getChannel.isOpen) {
     	println("Sending message: " + messageString)
+    	connected=false
     	Util.sendHttpResponse(context.getChannel, messageString)
     }
     else {
