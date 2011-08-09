@@ -12,6 +12,7 @@ repositories.remote << 'https://repository.jboss.org/nexus/content/repositories/
 
 NETTY = "org.jboss.netty:netty:jar:3.2.4.Final"
 JSON = "org.json:json:jar:20090211"
+JODA = ["joda-time:joda-time:jar:2.0", "org.joda:joda-convert:jar:1.1"]
 
 desc "Chat server and client written using netty"
 define "Netty-Chat" do
@@ -20,7 +21,7 @@ define "Netty-Chat" do
   project.group = GROUP
   manifest["Implementation-Vendor"] = COPYRIGHT
   manifest["Main-Class"] = "rosy.async.HttpServer"
-  compile.with NETTY, JSON, Dir[_() + '/src/main/lib/*']
+  compile.with NETTY, JSON, JODA, Dir[_() + '/src/main/lib/*']
   package(:jar)
 
   run.using :main => "rosy.async.Server"
