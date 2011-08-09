@@ -58,8 +58,8 @@ object Example {
     	})
     })
     
-    server.onDisconnect((client, data) => {
-      data.get("groupId").flatten.foreach((groupId) => {
+    server.onDisconnect(client => {
+      client.data.forEachValueOf("groupId", groupId => {
     	  listeners+=groupId->(listeners.getOrElse(groupId, Set.empty)-client)
       })
     })

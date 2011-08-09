@@ -8,7 +8,7 @@ import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory
 class Server {
 	var connectCallbacks: Set[(Client, DataStore)=>Unit] = Set.empty
 	var messageCallbacks: Set[(Client, DataStore)=>Unit] = Set.empty
-	var disconnectCallbacks: Set[(Client, DataStore)=>Unit] = Set.empty
+	var disconnectCallbacks: Set[(Client)=>Unit] = Set.empty
 	
 	def start {
 	  println("Starting server");
@@ -23,8 +23,8 @@ class Server {
 		handler.onConnect = (client, data) => {
 	    	connectCallbacks.foreach(_.apply(client, data))
 	      }
-	    handler.onDisconnect = (client, data) => {
-	        disconnectCallbacks.foreach(_.apply(client, data))
+	    handler.onDisconnect = (client) => {
+	        disconnectCallbacks.foreach(_.apply(client))
 	      }
 	    handler.onMessage = (client, data) => {
 	        messageCallbacks.foreach(_.apply(client, data))
@@ -37,7 +37,7 @@ class Server {
 	    bootstrap.bind(new InetSocketAddress(8081))
 	}
 	def onConnect(callback:(Client, DataStore)=>Unit) = connectCallbacks+=callback
-	def onDisconnect(callback:(Client, DataStore)=>Unit) = disconnectCallbacks+=callback
+	def onDisconnect(callback:(Client)=>Unit) = disconnectCallbacks+=callback
 	def onMessage(callback:(Client, DataStore)=>Unit) = messageCallbacks+=callback
 }
 
