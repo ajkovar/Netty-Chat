@@ -62,6 +62,8 @@ object Example {
       client.data.forEachValueOf("groupId", groupId => {
     	  listeners+=groupId->(listeners.getOrElse(groupId, Set.empty)-client)
       })
+      println("user " + client.data.getValue("username").get + " disconnected")
+      println("remaining listeners: " + listeners)
     })
     
     server.start
