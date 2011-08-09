@@ -41,7 +41,10 @@
 		client.pushListener({
 			type: "chat-user-connect",
 			callback: function(user) {
-				var userIsNew = true//$.grep(self.users, function(existingUser){existingUser.id==user.id}).length==0;
+				var userIsNew = $.grep(self.users, function(existingUser){
+					return existingUser.id==user.id
+				}).length==0;
+
 				if(userIsNew){
 					self.users.push(user)
 					populateUserList.call(self);
