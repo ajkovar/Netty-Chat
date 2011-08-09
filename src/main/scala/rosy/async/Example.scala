@@ -18,11 +18,7 @@ object Example {
         		println("user " + client.data.getValue("username").get)
         		client.send("chat-user-connect", Map("username" -> data.getValue("username").get, "id" -> data.getValue("id").get))
         	})
-        var group = listeners.getOrElse(groupId, Set.empty)
-        var inGroup = group.exists(_.data.getValue("id").get==id)
-        if(!inGroup) {
-          listeners+=groupId->(group+client)
-        }
+        listeners+=groupId->(listeners.getOrElse(groupId, Set.empty)+client)
       })
     })
     
@@ -49,6 +45,8 @@ object Example {
 	    	        	"users" -> 
 		    	          listeners.get(groupId).flatten
 		    	        	.filter(_.data.getValue("id").exists(_!=id))
+		    	        	// remove duplicates based on "id" value (group them by id and then only take the first)
+		    	        	.groupBy(_.data.getValue("id").get).values.map(_.first)
 		    	        	.map(listener => {
 		    	        	  Map("username" -> listener.data.getValue("username").get,
 		    	        	      "id" -> listener.data.getValue("id").get)
