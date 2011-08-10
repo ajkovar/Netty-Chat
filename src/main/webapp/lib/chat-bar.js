@@ -52,6 +52,17 @@
 			}
 		})
 
+		client.pushListener({
+			type: "chat-user-disconnect",
+			callback: function(user) {
+				self.users = $.grep(self.users, function(existingUser){
+					return existingUser.id!=user.id
+				})
+				populateUserList.call(self);
+			}
+		})
+
+
 	}
 
 	var populateUserList = function(){

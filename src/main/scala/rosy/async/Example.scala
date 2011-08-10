@@ -15,8 +15,7 @@ object Example {
         listeners.get(groupId).flatten
         	.filter(_.data.getValue("id").exists(_!=id))
         	.foreach(client => {
-        		println("user " + client.data.getValue("username").get)
-        		client.send("chat-user-connect", Map("username" -> data.getValue("username").get, "id" -> data.getValue("id").get))
+        		client.send("chat-user-connect", Map("username" -> data.getValue("username").get, "id" -> id))
         	})
         listeners+=groupId->(listeners.getOrElse(groupId, Set.empty)+client)
       })
@@ -61,6 +60,16 @@ object Example {
     server.onDisconnect(client => {
       client.data.forEachValueOf("groupId", groupId => {
     	  listeners+=groupId->(listeners.getOrElse(groupId, Set.empty)-client)
+      })
+      
+      val id = client.data.getValue("id").get
+      client.data.forEachValueOf("groupId", groupId=>{
+        println(groupId)
+        listeners.get(groupId).flatten
+	    	.filter(_.data.getValue("id").exists(_!=id))
+	    	.foreach(client => {
+	    		client.send("chat-user-disconnect", Map("id" -> id))
+	    	})
       })
       println("user " + client.data.getValue("username").get + " disconnected")
       println("remaining listeners: " + listeners)
