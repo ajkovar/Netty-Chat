@@ -12,7 +12,6 @@
 	width:200px;
 	float:left;
 	margin:20px;
-	vertical-align:bottom;
 }
 .chat-bar {
 	position:fixed;
@@ -23,5 +22,4 @@
 .chat-user-list {
 	width:100px;
 	float:left;
-	vertical-align:bottom;
 }
