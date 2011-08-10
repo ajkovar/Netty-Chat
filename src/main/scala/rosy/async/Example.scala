@@ -22,22 +22,20 @@ object Example {
     })
     
     server.onMessage((client, data) => {
+    	val id = client.data.getValue("id").get
     	data.getValue("messageType", messageType => {
     	  messageType match {
     	      case "message" => 
-    	        val id = client.data.getValue("id").get
     	        client.data.forEachValueOf("groupId", groupId => {
     	          data.forEachValueOf("body", body => {
     	            data.forEachValueOf("toId", toId => {
     	            	listeners.get(groupId).flatten
 		    			.filter(_.data.getValue("id").exists(_==toId))
-		    			.filter(_.data.getValue("id").exists(_!=id))
 		    			.foreach(_.send("chat-message", Map("toId" -> toId, "body" -> body, "fromId" -> id)))
     	            })
     	          })
     	        })
     	      case "list-users" =>
-    	        val id = client.data.getValue("id").get
     	        client.data.forEachValueOf("groupId", groupId => {
     	        	client.send("user-list", 
     	        	  Map(
@@ -64,7 +62,6 @@ object Example {
       
       val id = client.data.getValue("id").get
       client.data.forEachValueOf("groupId", groupId=>{
-        println(groupId)
         listeners.get(groupId).flatten
 	    	.filter(_.data.getValue("id").exists(_!=id))
 	    	.foreach(client => {
