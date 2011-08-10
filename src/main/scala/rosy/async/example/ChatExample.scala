@@ -1,8 +1,10 @@
-package rosy.async
+package rosy.async.example
 import scala.collection.immutable.Set
 import rosy.async.DataStore.requestDataToMap
+import rosy.async.Server
+import rosy.async.Client
 
-object Example {
+object ChatExample {
   def main(args : Array[String]) : Unit = {
     
     var listeners = Map[String, Set[Client]]()
