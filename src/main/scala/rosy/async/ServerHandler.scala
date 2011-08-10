@@ -13,6 +13,8 @@ import org.jboss.netty.handler.codec.http.QueryStringDecoder
 import org.joda.time.DateTime
 import java.util.Timer
 import java.util.TimerTask
+import org.jboss.netty.channel.ChannelFutureListener
+import org.jboss.netty.channel.ChannelFuture
 
 class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   
@@ -55,8 +57,14 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
       (key, value.toSet)
     }))
     
+    ctx.getChannel().getCloseFuture().addListener(new ChannelFutureListener {
+      def operationComplete(f: ChannelFuture) = {
+        println("channel closed")
+      }
+    })
+    
     if(req.getUri.contains("/connect")) {
-      parameters.getValue("callback", (callback) => {
+      parameters.getValue("callback", callback => {
         getSessionId(req) match {
           case None =>
               println("No session")
