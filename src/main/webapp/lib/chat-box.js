@@ -18,18 +18,27 @@
 
 	ChatBox.prototype = {
 		addMessage: function(sender, text){
-			this.messageBox.append(sender + ": " + text + "<br />");
+			appendLine.call(this, sender + ": " + text);
 		},
 		joined: function(user) {
-			this.messageBox.append(user.name + " joined the chat");
+			appendLine.call(this, user.username + " joined the chat");
 		},
 		leave: function(user){
-			this.messageBox.append(user.name + " left the chat");
+			appendLine.call(this, user.username + " left the chat");
 		},
 		focus: function(){
 			this.inputBox.focus();
 		}
 	};
+
+	var appendLine = function(line) {
+		this.messageBox.append("<div>" + line + "</div>");
+		var boxHeight = 0;
+		this.messageBox.children().each(function(){
+			boxHeight+=$(this).height();
+		});
+		this.messageBox.scrollTop(boxHeight);
+	}
 
 	var send = function(){
 		var self = this;
