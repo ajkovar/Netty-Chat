@@ -7,19 +7,18 @@
 	width:100%;
 	padding:.3em;
 }
-
 .chat-box {
 	width:200px;
-	float:left;
-	margin:20px;
+	position:absolute;
+	bottom:0px;
 }
 .chat-bar {
 	position:fixed;
 	bottom:0px;
 	width:100%;
 }
-
 .chat-user-list {
 	width:100px;
-	float:left;
+	position:absolute;
+	bottom:0px;
 }

@@ -15,7 +15,6 @@ object ChatExample {
     val server = new Server
     
     server.onConnect((client, data) => {
-      
       val chatClient = ChatClient(data.getValue("id").get, data.getValue("username").get, data.get("groupId").get)
       
       clientData+=(client->chatClient)

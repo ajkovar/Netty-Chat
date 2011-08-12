@@ -3,6 +3,8 @@
 	window.ChatBar = function(user) {
 		var self = this;
 
+		self.chatCount=0;
+
 		self.chatBar = $("<div>", {"class": "chat-bar"});
 		$("body").append(self.chatBar);
 
@@ -85,6 +87,11 @@
 		var self = this;
 		var container = $("<div>", {"class": "chat-box"});
 		this.chatBar.append(container)
+
+		var leftOffset = self.userList.outerWidth(true)+5+self.chatCount*(container.outerWidth(true)+5)
+
+		container.css({left: leftOffset})
+
 		var chat = new Chat({
 			container: container,
 			chatClient: self.client,
@@ -96,6 +103,7 @@
 		}
 
 		chat.focus()
+		self.chatCount++
 	}
 
 }()) 
