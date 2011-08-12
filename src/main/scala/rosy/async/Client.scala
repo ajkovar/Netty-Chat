@@ -18,7 +18,6 @@ import org.joda.time.DateTime
 
 class Client (var sessionId: String){
   @BeanProperty var connected = true
-  @BeanProperty var data:DataStore = null
   @BeanProperty var callback = ""
   @BeanProperty var context:ChannelHandlerContext = null 
   @BeanProperty var lastConnected:DateTime = null

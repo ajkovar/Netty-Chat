@@ -114,7 +114,6 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
 	  val client = new Client(sessionId)
 	  client.callback = callback
 	  client.context = ctx
-	  client.data = parameters
 	  client.connected=true
 	  client.lastConnected = new DateTime
 	  client
