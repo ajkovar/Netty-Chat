@@ -4,10 +4,16 @@
 
 		self.config = config;
 
+		var innerContainer = $("<div>");
 		self.messageBox = $("<div>", {"class": "chat-messages"});
 		self.inputBox = $("<input>", {"class": "chat-input"});
 
-		config.container.append(self.messageBox).append(self.inputBox);
+		innerContainer.append("Chat with " + $.map(config.users, function(user) {
+			return user.username
+		}).join(", "));
+							  
+		innerContainer.append(self.messageBox).append(self.inputBox);
+		config.container.append(innerContainer);
 
 		self.inputBox.keypress(function(e){
 			if(e.keyCode===13){
