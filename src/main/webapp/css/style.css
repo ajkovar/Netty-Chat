@@ -9,6 +9,16 @@
 	width:100%;
 	padding:.3em;
 }
+.chat-title-bar {
+	background-color: #454545;
+	color:#AAA;
+	border:1px solid #333;
+	margin-bottom:1px;
+}
+.chat-minimize, .chat-close {
+	margin:1px;
+	float:right;
+}
 .chat-box {
 	width:200px;
 	position:absolute;

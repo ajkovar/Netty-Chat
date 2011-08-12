@@ -4,16 +4,20 @@
 
 		self.config = config;
 
-		var innerContainer = $("<div>");
+		self.titleBar = $("<div>", {"class": "chat-title-bar"})
 		self.messageBox = $("<div>", {"class": "chat-messages"});
 		self.inputBox = $("<input>", {"class": "chat-input"});
 
-		innerContainer.append("Chat with " + $.map(config.users, function(user) {
+		var titleBarText = "Chat with " + $.map(config.users, function(user) {
 			return user.username
-		}).join(", "));
+		}).join(", ");
+
+		self.titleBar.append(titleBarText);
+
+		self.titleBar.append($("<div>", {"class": "chat-close"}).html("X"));
+		self.titleBar.append($("<div>", {"class": "chat-minimize"}).html("_"));
 							  
-		innerContainer.append(self.messageBox).append(self.inputBox);
-		config.container.append(innerContainer);
+		config.container.append(self.titleBar).append(self.messageBox).append(self.inputBox);
 
 		self.inputBox.keypress(function(e){
 			if(e.keyCode===13){
