@@ -15,25 +15,45 @@ import org.jboss.netty.handler.codec.http.DefaultHttpResponse
 import org.jboss.netty.util.CharsetUtil
 import org.jboss.netty.channel.ChannelHandlerContext
 import org.joda.time.DateTime
+import org.jboss.netty.channel.ChannelFuture
 
-class Client (var sessionId: String){
+class Client (var sessionId: String, var context: ChannelHandlerContext, var callback: String){
   @BeanProperty var connected = true
-  @BeanProperty var callback = ""
-  @BeanProperty var context:ChannelHandlerContext = null 
   @BeanProperty var lastConnected:DateTime = null
+  var messageQueue: List[Map[String, Any]] = List.empty
     
-  def onDisconnect(callback: ()=>Unit) {}
+  def connect = {
+    connected=true
+    lastConnected = new DateTime
+    context.getChannel().getCloseFuture().addListener(new ChannelFutureListener {
+      def operationComplete(f: ChannelFuture) = {
+        if(f.isSuccess()) {
+          connected = false
+          println("channel closed")
+        }
+      }
+    })
+    if(messageQueue.size>0) {
+      sendPayload
+    }
+  }
   
   def send(messageType: String, message :  Any) {
-    val messageString = callback + "(" + Json.build(createMessage(messageType, message)).toString + ")"
-    if(context.getChannel.isOpen) {
-    	println("Sending message: " + messageString)
-    	connected=false
-    	Util.sendHttpResponse(context.getChannel, messageString)
+    messageQueue=messageQueue:+createMessage(messageType, message)
+    if(connected) {
+    	sendPayload
     }
     else {
-      println("Attempting to send to non connected user message: " + messageString)
+      println("Queueing message for non connected user")
     }
+  }
+  
+  private def sendPayload() = {
+	var messageString = callback + "(" + Json.build(messageQueue).toString + ")"
+	println("Sending message: " + messageString)
+	connected=false
+	Util.sendHttpResponse(context.getChannel, messageString)
+	messageQueue = List.empty
   }
   
   private def createMessage(messageType:String, content: Any) = Map("type" -> messageType, "data" -> content)

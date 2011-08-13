@@ -21,12 +21,14 @@
 	ChatClient.prototype = {
 		connect: function(callback){
 			var self = this;
-			request.call(self, "/connect", {}, function(response){
-				self.listeners.forEach(function(listener){
-					if(listener.type===response.type){
-						listener.callback(response.data)
-					}
-				})
+			request.call(self, "/connect", {}, function(messages){
+				messages.forEach(function(message){
+					self.listeners.forEach(function(listener){
+						if(listener.type===message.type){
+							listener.callback(message.data)
+						}
+					})
+				});
 				self.connect();
 				(callback && callback())
 			})

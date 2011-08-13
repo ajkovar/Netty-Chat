@@ -51,17 +51,11 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     }
   }
   
-  def handleHttpRequest(ctx: ChannelHandlerContext, req: HttpRequest) {
+  def handleHttpRequest(context: ChannelHandlerContext, req: HttpRequest) {
     val parameters = new DataStore(new QueryStringDecoder(req.getUri).getParameters.toMap.map(pair => {
       val (key, value) = pair
       (key, value.toSet)
     }))
-    
-    ctx.getChannel().getCloseFuture().addListener(new ChannelFutureListener {
-      def operationComplete(f: ChannelFuture) = {
-        println("channel closed")
-      }
-    })
     
     if(req.getUri.contains("/connect")) {
       parameters.getValue("callback", callback => {
@@ -69,7 +63,7 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
           case None =>
               println("No session")
 	    	  val sessionId = UUID.randomUUID.toString
-    	      val client = createClient(sessionId, callback, ctx, parameters)
+    	      val client = createClient(sessionId, callback, context)
     	      clients+=sessionId->client
     	      client.send("session-established", Map("sessionId" -> sessionId))
     	      handler.onConnect.apply(client, parameters)
@@ -77,16 +71,15 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     	      println("Session " + sessionId)
 		      val client = clients.get(sessionId) match {
 		        case Some(client) =>
-		          client.context=ctx
-		          client.connected=true
-		          client.lastConnected=new DateTime
+		          client.context=context
+		          client.connect
 		        case _ => println("no client found with session ID: " + sessionId)
 		      }
         }
       })
     }
     else if(req.getUri.contains("/message")) {
-      Util.sendHttpResponse(ctx.getChannel, "")
+      Util.sendHttpResponse(context.getChannel, "")
       getSessionId(req) match {
         case Some(sessionId) =>
           	val client = clients.get(sessionId) match {
@@ -110,12 +103,9 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     }
   }
   
-  private def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext, parameters: DataStore): Client =  {
-	  val client = new Client(sessionId)
-	  client.callback = callback
-	  client.context = ctx
-	  client.connected=true
-	  client.lastConnected = new DateTime
+  private def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext): Client =  {
+	  val client = new Client(sessionId, ctx, callback)
+	  client.connect
 	  client
   }
 }
