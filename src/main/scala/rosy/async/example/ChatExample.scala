@@ -37,7 +37,7 @@ object ChatExample {
     	          data.forEachValueOf("body", body => {
     	            data.forEachValueOf("toId", toId => {
     	            	groups.get(groupId).flatten
-		    			.filter(client => { clientData.get(client).get.id==toId })
+		    			.filter(otherClient => { clientData.get(otherClient).get.id==toId })
 		    			.foreach(_.send("chat-message", Map("toId" -> toId, "body" -> body, "fromId" -> chatClient.id)))
     	            })
     	          })
@@ -48,11 +48,11 @@ object ChatExample {
     	        	  Map(
 	    	        	"users" -> 
 		    	          groups.get(groupId).flatten
-		    	        	.filter(client => { clientData.get(client).get!=chatClient })
+		    	        	.filter(otherClient => { clientData.get(otherClient).get!=chatClient })
 		    	        	// remove duplicates based on "id" value (group them by id and then only take the first)
 		    	        	.groupBy(client => { clientData.get(client).get.id }).values.map(_.first)
-		    	        	.map(client => {
-		    	        	  val otherUser = clientData.get(client).get
+		    	        	.map(otherClient => {
+		    	        	  val otherUser = clientData.get(otherClient).get
 		    	        	  Map("username" -> otherUser.username,
 		    	        	      "id" -> otherUser.id)
 		    	        	}).toList
@@ -69,9 +69,9 @@ object ChatExample {
       chatClient.groups.foreach(groupId => {
         groups+=groupId->(groups.getOrElse(groupId, Set.empty)-client)
         groups.get(groupId).flatten
-	    	.filter(client => { clientData.get(client)!=chatClient })
-	    	.foreach(client => {
-	    		client.send("chat-user-disconnect", Map("id" -> chatClient.id))
+	    	.filter(otherClient => { clientData.get(otherClient)!=chatClient })
+	    	.foreach(otherClient => {
+	    		otherClient.send("chat-user-disconnect", Map("id" -> chatClient.id))
 	    	})
       })
       println("user " + chatClient.username + " disconnected")

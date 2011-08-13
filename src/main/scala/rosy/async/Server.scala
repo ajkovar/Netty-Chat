@@ -11,7 +11,7 @@ class Server {
 	var disconnectCallbacks: Set[(Client)=>Unit] = Set.empty
 	
 	def start {
-	  println("Starting server");
+	  	println("Starting server");
 		
 		// Configure the server.
 		var bootstrap:ServerBootstrap = new ServerBootstrap(
