@@ -1,6 +1,6 @@
 (function(){
 
-	window.ChatBar = function(user) {
+	window.ChatBar = function(config) {
 		var self = this;
 
 		self.chatCount=0;
@@ -9,10 +9,13 @@
 		$("body").append(self.chatBar);
 
 		var client = self.client = new ChatClient({
-			url: "http://localhost:8081",
-			groupId: 329,
+			url: config.url,
+			groupId: config.groupId,
 			invisible: true,
-			user: user
+			user: {
+				id: config.id,
+				username: config.username
+			}
 		});
 
 		client.connect(function(){

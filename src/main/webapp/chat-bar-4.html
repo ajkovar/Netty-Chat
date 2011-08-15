@@ -7,22 +7,12 @@
 	<script type="text/javascript" src="lib/chat-box.js"></script>
 	<script type="text/javascript" src="lib/chat.js"></script>
 	<script type="text/javascript" src="lib/chat-bar.js"></script>
-	<style>
-	  .chat-box {
-	  position:relative;
-	  bottom:0px;
-	  margin:5px;
-	  margin-bottom:0px;
-	  }
-	  .chat-user-list {
-	  position:relative;
-	  bottom:0px;
-	  }
-	</style>
 	<script>
 	  $(document).ready(function(){
 	  var chatBar = new ChatBar({
+	  url:"http://localhost:8081",
 	  id:4,
+	  groupId:1,
 	  username:"sarah silverman"
 	  });
 	  })
