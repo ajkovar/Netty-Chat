@@ -20,9 +20,9 @@ define "Netty-Chat" do
   project.version = VERSION_NUMBER
   project.group = GROUP
   manifest["Implementation-Vendor"] = COPYRIGHT
-  manifest["Main-Class"] = "rosy.async.HttpServer"
+  manifest["Main-Class"] = "rosy.async.example.ChatExample"
   compile.with NETTY, JSON, JODA, Dir[_() + '/src/main/lib/*']
   package(:jar)
 
-  run.using :main => "rosy.async.Server"
+  run.using :main => "rosy.async.example.ChatExample"
 end
