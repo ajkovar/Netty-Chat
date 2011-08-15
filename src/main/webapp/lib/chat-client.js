@@ -66,7 +66,12 @@
 				username: self.config.user.username
 			}),
 			callbackParameter: "callback",
-			success: success
+			success: success,
+			error: function(){
+				setTimeout(function(){
+					request.call(self, path, data, success)
+				},5000)
+			}
 		})
 	};
 
