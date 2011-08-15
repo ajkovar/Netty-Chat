@@ -19,8 +19,9 @@ import org.jboss.netty.channel.ChannelFuture
 class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   
   var clients: Map[String, Client] = Map.empty
+  val lock = new AnyRef
   
-  val timeOutPeriod = 10000L
+  val timeOutPeriod = 20000L
   
   var timeoutTimer = new Timer
   timeoutTimer.schedule(new TimerTask {
@@ -37,7 +38,9 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
 	    }
 	    if(client.lastConnected.compareTo(maxTimeIdle)<0) {
 	      println("session "+client.sessionId+" idle for too long. disconnecting.")
-	      clients = clients-client.sessionId
+	      lock.synchronized {
+	    	  clients = clients-client.sessionId
+	      }
 	      handler.onDisconnect.apply(client)
 	    }
 	  })
@@ -60,32 +63,35 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
     if(req.getUri.contains("/connect")) {
       parameters.getValue("callback", callback => {
         getSessionId(req) match {
-          case None =>
-              println("No session")
-	    	  val sessionId = UUID.randomUUID.toString
-    	      val client = createClient(sessionId, callback, context)
-    	      clients+=sessionId->client
-    	      client.send("session-established", Map("sessionId" -> sessionId))
-    	      handler.onConnect.apply(client, parameters)
           case Some(sessionId) =>
     	      println("Session " + sessionId)
-		      val client = clients.get(sessionId) match {
+    	      clients.get(sessionId) match {
 		        case Some(client) =>
 		          client.context=context
 		          client.connect
-		        case _ => println("no client found with session ID: " + sessionId)
-		      }
+		        case None => 
+		          println("no client found with session ID: " + sessionId + ". creating one now")
+		          val client = createClient(sessionId, callback, context)
+	    	      handler.onConnect.apply(client, parameters)
+    	      }
+    	  case None =>
+              println("No session")
+	    	  val sessionId = UUID.randomUUID.toString
+    	      val client = createClient(sessionId, callback, context)
+    	      handler.onConnect.apply(client, parameters)
         }
       })
     }
     else if(req.getUri.contains("/message")) {
-      Util.sendHttpResponse(context.getChannel, "")
+      Util.sendHttpResponse(context.getChannel, parameters.getValue("callback").get + "({})")
       getSessionId(req) match {
         case Some(sessionId) =>
+          	println("message from session " + sessionId)
           	val client = clients.get(sessionId) match {
 		        case Some(client) => 
 		          handler.onMessage.apply(client, parameters)
-		        case _ => println("no client found with session ID: " + sessionId)
+		        case None => 
+		          println("no client found with session ID: " + sessionId)
           	}
         case None =>
           	println("message sent with no session")
@@ -106,6 +112,10 @@ class ServerHandler (handler:Handler) extends SimpleChannelUpstreamHandler {
   private def createClient(sessionId: String, callback: String, ctx: ChannelHandlerContext): Client =  {
 	  val client = new Client(sessionId, ctx, callback)
 	  client.connect
-	  client
+	  lock.synchronized {
+		  clients+=sessionId->client
+	  }
+      client.send("session-established", Map("sessionId" -> sessionId))
+      client
   }
 }

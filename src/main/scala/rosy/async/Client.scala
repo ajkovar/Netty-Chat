@@ -50,10 +50,10 @@ class Client (var sessionId: String, var context: ChannelHandlerContext, var cal
   
   private def sendPayload() = {
 	var messageString = callback + "(" + Json.build(messageQueue).toString + ")"
+	messageQueue = List.empty
 	println("Sending message: " + messageString)
 	connected=false
 	Util.sendHttpResponse(context.getChannel, messageString)
-	messageQueue = List.empty
   }
   
   private def createMessage(messageType:String, content: Any) = Map("type" -> messageType, "data" -> content)
